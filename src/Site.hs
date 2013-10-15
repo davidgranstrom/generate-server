@@ -34,8 +34,15 @@ floatToPcm = floor . corr . (* 2^15)
                | x < -32768 = (-32768)
                | otherwise  = x
 
-values :: [Int16]
-values = fmap (floatToPcm . (* 0.1) . sin . (/200)) [0,1..199]
+sineTable :: Float -> [Int16]
+sineTable fq = fmap (floatToPcm . (* 0.1) . sin . (*tau) . (/len)) [0,1..len-1]
+    where
+        len = 44100/fq
+        
+tau = 2*pi
+
+
+values = sineTable 880
 
 -- value :: Float
 -- value = 0
