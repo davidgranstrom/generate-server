@@ -8,9 +8,9 @@ module Application where
 ------------------------------------------------------------------------------
 import Control.Lens
 import Snap.Snaplet
-import Snap.Snaplet.Heist
-import Snap.Snaplet.Auth
-import Snap.Snaplet.Session
+-- import Snap.Snaplet.Heist
+-- import Snap.Snaplet.Auth
+-- import Snap.Snaplet.Session
 
 ------------------------------------------------------------------------------
 data App = App
