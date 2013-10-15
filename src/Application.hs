@@ -8,6 +8,7 @@ module Application where
 ------------------------------------------------------------------------------
 import Control.Lens
 import Snap.Snaplet
+import Sound.Generate
 -- import Snap.Snaplet.Heist
 -- import Snap.Snaplet.Auth
 -- import Snap.Snaplet.Session
@@ -18,6 +19,8 @@ data App = App
     --   _heist :: Snaplet (Heist App)
     -- , _sess :: Snaplet SessionManager
     -- , _auth :: Snaplet (AuthManager App)
+
+    _site :: IORef Site
     }
 
 makeLenses ''App

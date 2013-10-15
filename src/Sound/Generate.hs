@@ -1,10 +1,13 @@
 
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Sound.Generate where
 
+import Control.Lens
 import Data.Int
 import Data.String
+import Data.Monoid
 import qualified Codec.Digest.SHA as SHA -- TODO move
 import qualified Data.ByteString.Char8 as BS -- TODO move
 
@@ -36,6 +39,11 @@ data Site = Site {
     _users :: [User]
     }
     deriving (Eq, Ord, Show)
+instance Monoid Site where
+    mempty = Site mempty
+    Site x `mappend` Site y = Site (x <> y)
+
+
     
 data User = User {
     _name :: String,
@@ -74,3 +82,18 @@ hash = SHA.showBSasHex . SHA.hash SHA.SHA256 . BS.pack . show
 renderStream :: Site -> Time -> Stream -> [Double]
 renderStream = undefined
 
+
+makeLenses ''Site
+-- makeLenses ''Site
+-- makeLenses ''Site
+makeLenses ''Source
+makeLenses ''Stream
+makeLenses ''Trail
+makeLenses ''User
+
+
+
+testSite :: Site
+testSite = 
+    Site [User "hans" "h@h.c" [] [] [],
+          User "david" "d@d.c" [] [] []]
