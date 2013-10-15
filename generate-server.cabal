@@ -1,35 +1,29 @@
+Name:                generate-server
+Version:             0.1
+Synopsis:            Project Synopsis Here
+Description:         Project Description Here
+License:             AllRightsReserved
+Author:              HansHoglund, David Granstrom
+Maintainer:          hans@hanshoglund.se
+Stability:           Experimental
+Category:            Sound, Web
+Build-type:          Simple
+Cabal-version:       >=1.2
 
-name:               generate-server
-version:            0.5
-cabal-version:      >= 1.10
-author:             Hans Hoglund
-maintainer:         Hans Hoglund <hans@hanshoglund.se>
-license:            BSD3
-license-file:       COPYING
-synopsis:           To be written
-category:           
-tested-with:        GHC
-build-type:         Simple
+Executable generate-server
+  hs-source-dirs: src
+  main-is: Main.hs
 
-description:
-    To be written.
+  Build-depends:
+    base                      >= 4     && < 5,
+    bytestring                >= 0.9.1 && < 0.11,
+    MonadCatchIO-transformers >= 0.2.1 && < 0.4,
+    mtl                       >= 2     && < 3,
+    snap-core                 >= 0.9   && < 0.11,
+    snap-server               >= 0.9   && < 0.11
 
-source-repository head
-    type:               git
-    location:           git://github.com/hanshoglund/generate-server.git
-
-library
-    build-depends:
-        base            >= 4 && < 5
-    hs-source-dirs:     src
-    default-language:   Haskell2010
-    exposed-modules:
-        Sound.Generate
-
-executable "generate-server"
-    build-depends:
-        base            >= 4 && < 5
-    hs-source-dirs:     src
-    default-language:   Haskell2010
-    main-is:
-        Main.hs
+  if impl(ghc >= 6.12.0)
+    ghc-options: -threaded -Wall -fwarn-tabs -funbox-strict-fields -O2
+                 -fno-warn-unused-do-bind
+  else
+    ghc-options: -threaded -Wall -fwarn-tabs -funbox-strict-fields -O2
