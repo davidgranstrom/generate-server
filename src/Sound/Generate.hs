@@ -96,4 +96,4 @@ makeLenses ''User
 testSite :: Site
 testSite = 
     Site [User "hans" "h@h.c" [] [] [],
-          User "david" "d@d.c" [] [] []]
+          User "david" "h@h.c" [] [] []]

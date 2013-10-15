@@ -9,11 +9,19 @@ module Site
   ) where
 
 ------------------------------------------------------------------------------
--- import           Control.Applicative
+import Data.Char (ord)
+import           Control.Monad.Trans
+import           Control.Concurrent (threadDelay)
+import           Control.Monad
+import           Control.Applicative
 import           Data.ByteString (ByteString)
 -- import qualified Data.Text as T
 import           Snap.Core
 import           Snap.Snaplet
+
+import Data.Word
+import qualified Data.Enumerator.List as EL
+import qualified Blaze.ByteString.Builder as Builder
 -- import           Snap.Snaplet.Auth
 -- import           Snap.Snaplet.Auth.Backends.JsonFile
 -- import           Snap.Snaplet.Heist
@@ -70,9 +78,36 @@ routes = [
          -- , ("/new_user", with auth handleNewUser)
          -- , ("",          serveDirectory "static")
          
-         ("/my-error", liftSnap serverError)
+         ("/my-error", liftSnap serverError),
+         ("/forever", liftSnap writeForever),
+         ("/forever.wav", liftSnap writeForever)
+
          ]
 
+
+-- values :: [Word8]
+-- values = map (fromIntegral . ord) "hans\n"
+
+values :: [Float]
+values = fmap (sin . (/100)) [0,1..100]
+
+-- value :: Float
+-- value = 0
+
+writeForever :: Snap ()
+writeForever = do
+   modifyResponse $ addHeader "Content-Type" "audio/wav"
+   modifyResponse $ addHeader "Connection" "Keep-Alive"
+   modifyResponse $ setBufferingMode False
+   modifyResponse $ setResponseBody $ EL.unfoldM (\s -> do
+       -- threadDelay 500000
+       return (Just (Builder.fromStorables values, s))) ()
+
+   -- replicateM_ 3 $ do
+   --     liftIO $ threadDelay 500000
+   --     writeText "For ever\n"
+   -- r <- getResponse
+   -- finishWith r
 
 
 serverError :: Snap ()

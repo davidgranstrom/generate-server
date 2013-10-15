@@ -20,7 +20,7 @@ data App = App
     -- , _sess :: Snaplet SessionManager
     -- , _auth :: Snaplet (AuthManager App)
 
-    _site :: IORef Site
+    -- _site :: IORef Site
     }
 
 makeLenses ''App
