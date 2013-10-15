@@ -17,6 +17,7 @@ import Snap.Core
 import Snap.Snaplet
 
 import Data.Int
+import Data.Monoid
 import Data.Word
 import qualified Data.Enumerator.List as EL
 import qualified Blaze.ByteString.Builder as Builder
@@ -66,6 +67,20 @@ serverError = do
    finishWith r
 
 
+wrapHtmlBody x = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\"/></head><body>" <> x <> "</body></html>\n"
+
+index :: Snap ()
+index = writeText $ wrapHtmlBody "<h1>Index!</h1>"
+
+audio :: Snap ()
+audio = writeText $ wrapHtmlBody $ ""
+    <> "<h1>Audio!</h1>\n"
+    <> "\n"
+    <> "<audio controls>\n"
+    <> "  <source src=\"forever.wav\" type=\"audio/wav\">\n"
+    <> "Your browser does not support the audio element.\n"
+    <> "</audio>\n"
+
 -- | The application's routes.
 routes :: [(ByteString, Handler App App ())]
 routes = [
@@ -76,8 +91,8 @@ routes = [
 
          ("/my-error", liftSnap serverError),
          ("/forever", liftSnap writeForever),
-         ("/forever.wav", liftSnap writeForever)
-
+         ("/forever.wav", liftSnap writeForever),
+         ("", liftSnap audio)
          ]
 
 -- | The application initializer.
