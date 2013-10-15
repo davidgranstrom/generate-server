@@ -26,7 +26,9 @@ Library
     Sound.Generate
   
   Build-depends:
-    -- bytestring                >= 0.9.1   && < 0.11,
+    SHA2,
+    bytestring                >= 0.9.1   && < 0.11
+    
     -- heist                     >= 0.13    && < 0.14,
     -- MonadCatchIO-transformers >= 0.2.1   && < 0.4,
     -- mtl                       >= 2       && < 3,
@@ -43,6 +45,7 @@ Executable generate-server
   main-is: Main.hs
 
   Build-depends:
+    SHA2,
     bytestring                >= 0.9.1   && < 0.11,
     heist                     >= 0.13    && < 0.14,
     MonadCatchIO-transformers >= 0.2.1   && < 0.4,
