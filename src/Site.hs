@@ -19,6 +19,7 @@ import           Data.ByteString (ByteString)
 import           Snap.Core
 import           Snap.Snaplet
 
+import Data.Int
 import Data.Word
 import qualified Data.Enumerator.List as EL
 import qualified Blaze.ByteString.Builder as Builder
@@ -88,15 +89,25 @@ routes = [
 -- values :: [Word8]
 -- values = map (fromIntegral . ord) "hans\n"
 
-values :: [Float]
-values = fmap (sin . (/100)) [0,1..100]
+-- TODO dither
+floatToPcm :: Float -> Int16
+floatToPcm = floor . corr . (* 2^15)
+    where
+        corr x | x > 32767  = 32767
+               | x < -32768 = (-32768)
+               | otherwise  = x
+    
+values :: [Int16]
+values = fmap (floatToPcm . (* 0.1) . sin . (/200)) [0,1..199]
 
 -- value :: Float
 -- value = 0
 
+-- TODO 16 bit pcm
+
 writeForever :: Snap ()
 writeForever = do
-   modifyResponse $ addHeader "Content-Type" "audio/wav"
+   modifyResponse $ addHeader "Content-Type" "audio/wave"
    modifyResponse $ addHeader "Connection" "Keep-Alive"
    modifyResponse $ setBufferingMode False
    modifyResponse $ setResponseBody $ EL.unfoldM (\s -> do
