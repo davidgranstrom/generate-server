@@ -24,6 +24,13 @@ newtype StreamRef = StreamRef { getStreamRef :: String }
 newtype SourceRef = SourceRef { getSourceRef :: String }
     deriving (Eq, Ord, Show, IsString)
 
+hashTrail :: Trail -> TrailRef
+hashStream :: Stream -> StreamRef
+hashSource :: Source -> SourceRef
+hashTrail = TrailRef . hash
+hashStream = StreamRef . hash
+hashSource = SourceRef . hash
+
 
 data Site = Site {
     _users :: [User]
@@ -33,9 +40,9 @@ data Site = Site {
 data User = User {
     _name :: String,
     _email :: String,
-    _trails :: [Trail],
-    _streams :: [Stream],
-    _sources :: [Source]
+    _trails :: [(TrailRef, Trail)],
+    _streams :: [(StreamRef, Stream)],
+    _sources :: [(SourceRef, Source)]
     }
     deriving (Eq, Ord, Show)
     
