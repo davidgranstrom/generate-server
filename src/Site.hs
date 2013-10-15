@@ -26,6 +26,7 @@ import           Application
 
 
 ------------------------------------------------------------------------------
+{-
 -- | Render login form
 handleLogin :: Maybe T.Text -> Handler App (AuthManager App) ()
 handleLogin authError = heistLocal (I.bindSplices errs) $ render "login"
@@ -56,35 +57,51 @@ handleNewUser :: Handler App (AuthManager App) ()
 handleNewUser = method GET handleForm <|> method POST handleFormSubmit
   where
     handleForm = render "new_user"
-    handleFormSubmit = registerUser "login" "password" >> redirect "/"
+    handleFormSubmit = registerUser "login" "password" >> redirect "/"      -}
+
 
 
 ------------------------------------------------------------------------------
 -- | The application's routes.
 routes :: [(ByteString, Handler App App ())]
-routes = [ ("/login",    with auth handleLoginSubmit)
-         , ("/logout",   with auth handleLogout)
-         , ("/new_user", with auth handleNewUser)
-         , ("",          serveDirectory "static")
+routes = [ 
+         --   ("/login",    with auth handleLoginSubmit)
+         -- , ("/logout",   with auth handleLogout)
+         -- , ("/new_user", with auth handleNewUser)
+         -- , ("",          serveDirectory "static")
+         
+         ("/my-error", liftSnap serverError)
          ]
 
+
+
+serverError :: Snap ()
+serverError = do
+   modifyResponse $ setResponseStatus 500 "Internal Server Error"
+   writeBS "This is an error"
+   r <- getResponse
+   finishWith r
 
 ------------------------------------------------------------------------------
 -- | The application initializer.
 app :: SnapletInit App App
 app = makeSnaplet 
         "generate-server" 
-        "An snaplet example application." Nothing $ do
-    h <- nestSnaplet "" heist $ heistInit "templates"
-    s <- nestSnaplet "sess" sess $
-           initCookieSessionManager "site_key.txt" "sess" (Just 3600)
+        "The generate server."
+        Nothing 
+        $ do
 
-    -- NOTE: We're using initJsonFileAuthManager here because it's easy and
-    -- doesn't require any kind of database server to run.  In practice,
-    -- you'll probably want to change this to a more robust auth backend.
-    a <- nestSnaplet "auth" auth $
-           initJsonFileAuthManager defAuthSettings sess "users.json"
+    -- h <- nestSnaplet "" heist $ heistInit "templates"
+    -- s <- nestSnaplet "sess" sess $
+    --        initCookieSessionManager "site_key.txt" "sess" (Just 3600)
+    -- 
+    -- -- NOTE: We're using initJsonFileAuthManager here because it's easy and
+    -- -- doesn't require any kind of database server to run.  In practice,
+    -- -- you'll probably want to change this to a more robust auth backend.
+    -- a <- nestSnaplet "auth" auth $
+    --        initJsonFileAuthManager defAuthSettings sess "users.json"
+
     addRoutes routes
-    addAuthSplices h auth
-    return $ App h s a
+    -- addAuthSplices h auth
+    return $ App
 

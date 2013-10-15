@@ -14,15 +14,16 @@ import Snap.Snaplet.Session
 
 ------------------------------------------------------------------------------
 data App = App
-    { _heist :: Snaplet (Heist App)
-    , _sess :: Snaplet SessionManager
-    , _auth :: Snaplet (AuthManager App)
+    { 
+    --   _heist :: Snaplet (Heist App)
+    -- , _sess :: Snaplet SessionManager
+    -- , _auth :: Snaplet (AuthManager App)
     }
 
 makeLenses ''App
 
-instance HasHeist App where
-    heistLens = subSnaplet heist
+-- instance HasHeist App where
+--     heistLens = subSnaplet heist
 
 
 ------------------------------------------------------------------------------
