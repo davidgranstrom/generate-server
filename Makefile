@@ -12,9 +12,9 @@ stop:
 	killall generate-server
 
 
+# This will run forever if not cancelled
 get:
-	curl -v http://localhost:8000/forever >test.raw
+	curl -v localhost:8000/forever.wav > test.wav
 
-convert:
-	sox -r 44100 -e signed -b 16 -c 1 test.raw test.wav
+open:
 	open -a Audacity test.wav
