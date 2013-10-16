@@ -8,7 +8,6 @@
 module Site (app) where
 
 import Data.Char (ord)
-import Control.Monad.Trans
 import Control.Concurrent (threadDelay)
 import Control.Monad
 import Control.Applicative
@@ -16,6 +15,7 @@ import Data.ByteString (ByteString)
 import Snap.Core
 import Snap.Snaplet
 
+-- import Data.WAVE
 import Data.Int
 import Data.Monoid
 import Data.Word
@@ -43,21 +43,35 @@ sineTable fq = fmap (floatToPcm . (* 0.1) . sin . (*tau) . (/len)) [0,1..len-1]
 tau = 2*pi
 
 
-values = sineTable 880
+values = sineTable 220
 
 -- value :: Float
 -- value = 0
 
 -- TODO 16 bit pcm
 
+
+infWavHeader :: [Word8]
+infWavHeader = [
+    0x52, 0x49, 0x46, 0x46, 0x24, 0x40, 0x00, 0x00, 0x57, 0x41, 0x56, 0x45, 0x66, 0x6d, 0x74, 0x20,
+    0x10, 0x00, 0x00, 0x00, 0x01, 0x00, 0x02, 0x00, 0x44, 0xac, 0x00, 0x00, 0x10, 0xb1, 0x02, 0x00,
+    0x04, 0x00, 0x10, 0x00, 0x64, 0x61, 0x74, 0x61, 0xff, 0xff, 0xff, 0xff]
+
+
 writeForever :: Snap ()
 writeForever = do
-   modifyResponse $ addHeader "Content-Type" "audio/wave"
-   modifyResponse $ addHeader "Connection" "Keep-Alive"
-   modifyResponse $ setBufferingMode False
-   modifyResponse $ setResponseBody $ EL.unfoldM (\s -> do
-       -- threadDelay 500000
-       return (Just (Builder.fromStorables values, s))) ()
+    modifyResponse $ addHeader "Content-Type" "audio/wave"
+    modifyResponse $ addHeader "Connection" "Keep-Alive"
+    modifyResponse $ setBufferingMode False
+
+    modifyResponse $ setResponseBody $ EL.unfoldM (\s -> do
+        let d1 = if (s == 0) then Builder.fromStorables infWavHeader else mempty
+        let d2 = Builder.fromStorables values
+        let d = d1 <> d2
+        return (if {-s > (44100*2)-} False then Nothing else Just (d, s + 1))) 0
+
+   -- modifyResponse $ setResponseBody $ EL.unfoldM (\s -> do
+   --     return (Just (Builder.fromStorables values, s))) ()
 
 serverError :: Snap ()
 serverError = do
