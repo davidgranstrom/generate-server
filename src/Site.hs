@@ -17,9 +17,12 @@ import Snap.Snaplet
 
 -- import Data.WAVE
 import Data.Int
-import Data.Text
 import Data.Monoid
 import Data.Word
+import qualified Data.ByteString.Char8 as BS8
+import qualified Data.ByteString as BS
+import qualified Data.List as L
+import qualified Data.Text as T
 import qualified Data.Enumerator.List as EL
 import qualified Blaze.ByteString.Builder as Builder
 
@@ -83,12 +86,20 @@ serverError = do
 
 sines' :: Snap ()
 sines' = pathArg $ \subpath -> do
-    -- _ <- return (subpath :: Text)
-    writeBS $ "This is sine " <> subpath
+    let x = read (checkForWavSuffix (T.unpack subpath)) :: Double
+    writeBS $ "This is sine " <> BS8.pack (show x)
 
-   -- r <- getResponse
-   -- finishWith r
+checkForWavSuffix :: String -> String
+checkForWavSuffix s = if L.isSuffixOf ".wav" s then dropAtEnd 4 s else s 
 
+inReverse :: ([a] -> [b]) -> [a] -> [b]
+inReverse f = reverse . f . reverse
+
+takeAtEnd :: Int -> [a] -> [a]
+takeAtEnd n = inReverse (take n)
+
+dropAtEnd :: Int -> [a] -> [a]
+dropAtEnd n = inReverse (drop n)
 
 wrapHtmlBody x = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\"/></head><body>" <> x <> "</body></html>\n"
 
