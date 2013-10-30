@@ -19,6 +19,11 @@ import Snap.Snaplet
 import Data.Int
 import Data.Monoid
 import Data.Word
+import Data.String
+import qualified Data.ByteString.Char8 as BS8
+import qualified Data.ByteString as BS
+import qualified Data.List as L
+import qualified Data.Text as T
 import qualified Data.Enumerator.List as EL
 import qualified Blaze.ByteString.Builder as Builder
 
@@ -58,15 +63,15 @@ infWavHeader = [
     0x04, 0x00, 0x10, 0x00, 0x64, 0x61, 0x74, 0x61, 0xff, 0xff, 0xff, 0xff]
 
 
-writeForever :: Snap ()
-writeForever = do
+writeForever :: Double -> Snap ()
+writeForever freq = do
     modifyResponse $ addHeader "Content-Type" "audio/wave"
     modifyResponse $ addHeader "Connection" "Keep-Alive"
     modifyResponse $ setBufferingMode False
 
     modifyResponse $ setResponseBody $ EL.unfoldM (\s -> let
         d1 = if (s == 0) then Builder.fromStorables infWavHeader else mempty
-        d2 = Builder.fromStorables values
+        d2 = Builder.fromStorables (sineTable $ realToFrac freq)
         d = d1 <> d2
         in return (if {-s > (44100*2)-} False then Nothing else Just (d, s + 1))) 0
 
@@ -80,20 +85,42 @@ serverError = do
    r <- getResponse
    finishWith r
 
+sines' :: Snap ()
+sines' = pathArg $ \subpath -> do
+    let x = read (checkForWavSuffix (T.unpack subpath)) :: Double
+    -- writeBS $ "This is sine " <> BS8.pack (show x)
+    writeForever x
+
+checkForWavSuffix :: String -> String
+checkForWavSuffix s = if L.isSuffixOf ".wav" s then dropAtEnd 4 s else s 
+
+inReverse :: ([a] -> [b]) -> [a] -> [b]
+inReverse f = reverse . f . reverse
+
+takeAtEnd :: Int -> [a] -> [a]
+takeAtEnd n = inReverse (take n)
+
+dropAtEnd :: Int -> [a] -> [a]
+dropAtEnd n = inReverse (drop n)
 
 wrapHtmlBody x = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\"/></head><body>" <> x <> "</body></html>\n"
 
 index :: Snap ()
 index = writeText $ wrapHtmlBody "<h1>Index!</h1>"
 
-audio :: Snap ()
-audio = writeText $ wrapHtmlBody $ ""
+audio' :: Double -> Snap ()
+audio' freq = writeText $ wrapHtmlBody $ ""
     <> "<h1>Audio!</h1>\n"
     <> "\n"
     <> "<audio controls>\n"
-    <> "  <source src=\"forever.wav\" type=\"audio/wav\">\n"
+    <> "  <source src=\"sines/" <> fromString (show (round freq)) <> ".wav\" type=\"audio/wav\">\n"
     <> "Your browser does not support the audio element.\n"
     <> "</audio>\n"
+
+audio :: Snap ()
+audio = pathArg $ \subpath -> let
+    x = read (checkForWavSuffix (T.unpack subpath)) :: Double
+    in audio' x 
 
 -- | The application's routes.
 routes :: [(ByteString, Handler App App ())]
@@ -104,8 +131,8 @@ routes = [
          -- , ("",          serveDirectory "static")
 
          ("/my-error", liftSnap serverError),
-         ("/forever", liftSnap writeForever),
-         ("/forever.wav", liftSnap writeForever),
+         ("/forever", liftSnap (writeForever 440)),
+         ("/sines", liftSnap sines'), -- only responds /sines/FREQ.wav
          ("/", liftSnap audio)
          ]
 
