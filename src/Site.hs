@@ -64,11 +64,11 @@ writeForever = do
     modifyResponse $ addHeader "Connection" "Keep-Alive"
     modifyResponse $ setBufferingMode False
 
-    modifyResponse $ setResponseBody $ EL.unfoldM (\s -> do
-        let d1 = if (s == 0) then Builder.fromStorables infWavHeader else mempty
-        let d2 = Builder.fromStorables values
-        let d = d1 <> d2
-        return (if {-s > (44100*2)-} False then Nothing else Just (d, s + 1))) 0
+    modifyResponse $ setResponseBody $ EL.unfoldM (\s -> let
+        d1 = if (s == 0) then Builder.fromStorables infWavHeader else mempty
+        d2 = Builder.fromStorables values
+        d = d1 <> d2
+        in return (if {-s > (44100*2)-} False then Nothing else Just (d, s + 1))) 0
 
    -- modifyResponse $ setResponseBody $ EL.unfoldM (\s -> do
    --     return (Just (Builder.fromStorables values, s))) ()
@@ -106,7 +106,7 @@ routes = [
          ("/my-error", liftSnap serverError),
          ("/forever", liftSnap writeForever),
          ("/forever.wav", liftSnap writeForever),
-         ("", liftSnap audio)
+         ("/", liftSnap audio)
          ]
 
 -- | The application initializer.
