@@ -17,6 +17,7 @@ import Snap.Snaplet
 
 -- import Data.WAVE
 import Data.Int
+import Data.Text
 import Data.Monoid
 import Data.Word
 import qualified Data.Enumerator.List as EL
@@ -80,6 +81,14 @@ serverError = do
    r <- getResponse
    finishWith r
 
+sines' :: Snap ()
+sines' = pathArg $ \subpath -> do
+    -- _ <- return (subpath :: Text)
+    writeBS $ "This is sine " <> subpath
+
+   -- r <- getResponse
+   -- finishWith r
+
 
 wrapHtmlBody x = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\"/></head><body>" <> x <> "</body></html>\n"
 
@@ -106,6 +115,7 @@ routes = [
          ("/my-error", liftSnap serverError),
          ("/forever", liftSnap writeForever),
          ("/forever.wav", liftSnap writeForever),
+         ("/sines", liftSnap sines'), -- only responds /sines/FREQ.wav
          ("/", liftSnap audio)
          ]
 
